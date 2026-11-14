@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chocoboyos · Medición y Comparación (Montserrat)</title>
+<style>
+body { background: #110e19; color: #fff7ef; font-family: system-ui, sans-serif; padding: 24px; max-width: 900px; margin: auto; }
+.panel { background: #1b1726; border: 1px solid #44364e; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+th, td { padding: 10px; border-bottom: 1px solid #49394e; text-align: left; }
+th { color: #f9d9ae; background: #33283d; }
+td { color: #e7d6e4; }
+.conclusion { background: #251d32; border-left: 3px solid #eba777; padding: 12px; font-size: 13px; border-radius: 6px; margin-top: 10px; color: #ddcfe0; }
+button { background: #362a42; color: #fff; border: 1px solid #664d67; padding: 8px 14px; border-radius: 8px; cursor: pointer; font: inherit; }
+button:hover { filter: brightness(1.15); }
+</style>
+</head>
+<body>
+
+<div class="panel">
+ <h2>Módulo de Medición y Comparación (Montserrat)</h2>
+ <p style="color: #c2b5c9; font-size: 13px;">Este módulo procesa los tiempos de ejecución, calcula medianas, estructura los datos para exportación CSV y genera la conclusión comparativa de calidad frente a tiempo.</p>
+ <button id="testBtn">Simular Prueba de las 3 Técnicas</button>
+</div>
+
+<div class="panel">
+ <h3>Tabla de Resultados</h3>
+ <table>
+  <thead>
+   <tr><th>Técnica</th><th>Resolución</th><th>AO</th><th>AA</th><th>Sombras</th><th>Tiempo (ms)</th></tr>
+  </thead>
+  <tbody id="rows">
+   <tr><td colspan="6" style="text-align:center; color:#a994ad;">Sin mediciones aún. Pulsa el botón superior.</td></tr>
+  </tbody>
+ </table>
+</div>
+
+<div class="panel">
+ <h3>Conclusión de Calidad vs. Tiempo</h3>
+ <div id="conclusion" class="conclusion">La conclusión comparativa aparecerá aquí tras ejecutar la simulación de las tres técnicas.</div>
+</div>
+
+<script>
+/* Inicialización del espacio de nombres ChocoLab */
+window.ChocoLab = { comparison: {} };
+</script>
+
+<script>
+/* PARTE 4 · MONTSERRAT: Módulo de medición, estadística de medianas, tabla y conclusión dinámica. */
+(function(){
+'use strict';
+const median=v=>{const a=v.slice().sort((x,y)=>x-y);return a[Math.floor(a.length/2)]};
+function calculate(records){
+ const byMode={};for(const r of records)byMode[r.mode]=r;
+ const s=byMode.scanline,r=byMode.ray,a=byMode.ao;
+ if(!(s&&r&&a))return 'Faltan resultados de una o más técnicas. Pulsa «Medir las 3 técnicas» para realizar una comparación con los mismos objetos, cámara, iluminación y resolución.';
+ if(s.width!==r.width||r.width!==a.width||s.height!==r.height||s.height!==a.height)return 'Las resoluciones son diferentes; ejecuta el comparador para obtener una medición equivalente.';
+ const ratio1=(r.ms/s.ms).toFixed(2),ratio2=(a.ms/r.ms).toFixed(2);
+ return `En esta medición (${s.width} × ${s.height}), Scanline tardó ${s.ms.toFixed(1)} ms, Ray Tracing ${r.ms.toFixed(1)} ms y Ray Tracing + AO ${a.ms.toFixed(1)} ms. La relación de tiempo Ray/Scanline fue ${ratio1}× y AO/Ray ${ratio2}×. Scanline muestra superficies por caras, Ray Tracing añade sombras y reflexión, mientras que AO mejora la percepción de contacto entre objetos a cambio de lanzar más rayos. Estas cifras corresponden a este navegador y configuración; no son constantes universales.`;
+}
+function csv(records){
+ const esc=s=>'"'+String(s).replace(/"/g,'""')+'"';
+ const rows=[['Técnica','Resolución','AO','AA','Sombras','Tiempo ms']];
+ for(const r of records)rows.push([r.label,`${r.width}x${r.height}`,r.mode==='ao'?r.samples:'—',r.aa?'4x':'1x',r.shadows===null?'—':r.shadows?'sí':'no',r.ms.toFixed(2)]);
+ return '\ufeff'+rows.map(v=>v.map(esc).join(';')).join('\r\n');
+}
+window.ChocoLab.comparison={median,calculate,csv};
+})();
+</script>
+
+<script>
+/* Script de prueba interactiva para verificar el funcionamiento de Montserrat */
+document.getElementById('testBtn').addEventListener('click', () => {
+ const mockRecords = [
+  { mode: 'scanline', label: 'Scanline · triángulos + z-buffer', width: 320, height: 200, samples: 8, aa: false, shadows: null, ms: 14.5 },
+  { mode: 'ray', label: 'Ray Tracing · sombras + reflexión', width: 320, height: 200, samples: 8, aa: false, shadows: true, ms: 68.2 },
+  { mode: 'ao', label: 'Ray Tracing + Oclusión Ambiental', width: 320, height: 200, samples: 8, aa: false, shadows: true, ms: 142.0 }
+ ];
+
+ const tbody = document.getElementById('rows');
+ tbody.innerHTML = '';
+ mockRecords.forEach(rec => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${rec.label}</td><td>${rec.width} × ${rec.height}</td><td>${rec.mode==='ao'?rec.samples:'—'}</td><td>${rec.aa?'4×':'1×'}</td><td>${rec.shadows===null?'—':rec.shadows?'Sí':'No'}</td><td>${rec.ms.toFixed(1)}</td>`;
+  tbody.appendChild(tr);
+ });
+
+ document.getElementById('conclusion').textContent = window.ChocoLab.comparison.calculate(mockRecords);
+});
+</script>
+
+</body>
+</html>
