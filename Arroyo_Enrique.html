@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chocoboyos · Ray Tracing (Enrique)</title>
+<style>
+body { background: #110e19; color: #fff7ef; font-family: system-ui, sans-serif; display: grid; place-items: center; height: 100vh; margin: 0; }
+canvas { background: #221e34; border: 1px solid #44364e; border-radius: 12px; max-width: 100%; height: auto; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas" width="320" height="200"></canvas>
+
+<script>
+/* Mock inicial de ChocoLab y dependencias base para probar el script de Enrique de forma independiente si es necesario */
+window.ChocoLab = {
+ V: {
+  add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+  sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+  scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+  norm(a){const l=Math.hypot(...a);return l>1e-12?this.scale(a,1/l):[0,1,0]},
+  clamp:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),
+  mix:(a,b,t)=>a.map((v,i)=>v*(1-t)+b[i]*t)
+ },
+ scene: {
+  eye:[0,2.48,-4.95], target:[0,1.26,4.5], fov:45*Math.PI/180, floorY:-0.08,
+  light:[ -0.72, 1.55, -0.88 ],
+  triangles: [], spheres: [],
+  materials: { floor:{color:[0.23,0.24,0.38],reflection:0.04}, chocolate:{color:[0.37,0.18,0.12],reflection:0.44} },
+  background(dir){ return [0.18, 0.19, 0.34]; },
+  materialAt(obj,point){ return this.materials[obj.material] || {color:[0.8,0.8,0.8], reflection:0}; }
+ }
+};
+window.ChocoLab.scene.cameraRay = function(x,y,w,h){
+ const forward=this.basis?.forward || [0,0,1], right=this.basis?.right || [1,0,0], up=this.basis?.up || [0,1,0];
+ const f=Math.tan(this.fov/2), aspect=w/h;
+ return window.ChocoLab.V.norm(window.ChocoLab.V.add(forward,window.ChocoLab.V.add(window.ChocoLab.V.scale(right,(2*x/w-1)*aspect*f),window.ChocoLab.V.scale(up,(1-2*y/h)*f))));
+};
+</script>
+
+<script>
+/* PARTE 2 · ENRIQUE: Motor de Ray Tracing completo (BVH, intersecciones, sombras y reflejos). */
+(function(){
+'use strict';
+const Lab=window.ChocoLab,{V,scene}=Lab,EPS=0.002;
+for(const t of scene.triangles){t.e1=V.sub(t.b,t.a);t.e2=V.sub(t.c,t.a)}
+function bvh(tris,depth=0){
+ const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+ for(const t of tris)for(let i=0;i<3;i++){min[i]=Math.min(min[i],t.min[i]);max[i]=Math.max(max[i],t.max[i])}
+ if(tris.length<=7||depth>=20)return {min,max,tris};
+ const lengths=min.map((v,i)=>max[i]-v),axis=lengths.indexOf(Math.max(...lengths));
+ tris.sort((a,b)=>a.centroid[axis]-b.centroid[axis]);
+ const mid=tris.length>>1;
+ return {min,max,left:bvh(tris.slice(0,mid),depth+1),right:bvh(tris.slice(mid),depth+1)};
+}
+const tree=bvh(scene.triangles.slice());
+function hitBox(o,d,n,tlimit){
+ let near=EPS,far=tlimit;
+ for(let i=0;i<3;i++){
+  if(Math.abs(d[i])<1e-9){if(o[i]<n.min[i]||o[i]>n.max[i])return false;continue}
+  const inv=1/d[i],t0=(n.min[i]-o[i])*inv,t1=(n.max[i]-o[i])*inv;
+  near=Math.max(near,Math.min(t0,t1));far=Math.min(far,Math.max(t0,t1));
+  if(far<near)return false;
+ }
+ return true;
+}
+function intersectTriangle(o,d,t){
+ const p=V.cross(d,t.e2),det=V.dot(t.e1,p);
+ if(Math.abs(det)<1e-9)return Infinity;
+ const inv=1/det,s=V.sub(o,t.a),u=V.dot(s,p)*inv;
+ if(u<0||u>1)return Infinity;
+ const q=V.cross(s,t.e1),v=V.dot(d,q)*inv;
+ if(v<0||u+v>1)return Infinity;
+ const dist=V.dot(t.e2,q)*inv;
+ return dist>EPS?dist:Infinity;
+}
+function intersectSphere(o,d,s){
+ const oc=V.sub(o,s.center),b=V.dot(oc,d),c=V.dot(oc,oc)-s.radius*s.radius;
+ const delta=b*b-c;if(delta<0)return Infinity;
+ const root=Math.sqrt(delta);let t=-b-root;
+ if(t<=EPS)t=-b+root;
+ return t>EPS?t:Infinity;
+}
+function intersectFloor(o,d){
+ if(Math.abs(d[1])<1e-9)return Infinity;
+ const t=(scene.floorY-o[1])/d[1];
+ if(t<=EPS)return Infinity;
+ const x=o[0]+t*d[0],z=o[2]+t*d[2];
+ return x>=-22&&x<=22&&z>=-2&&z<=32?t:Infinity;
+}
+function trace(o,d,limit=Infinity,stats){
+ let best=limit,obj=null,type=null;
+ for(const s of scene.spheres){
+  const t=intersectSphere(o,d,s);
+  if(t<best){best=t;obj=s;type='sphere'}
+ }
+ const stack=[tree];
+ while(stack.length){
+  const node=stack.pop();
+  if(!hitBox(o,d,node,best))continue;
+  if(node.tris){
+   for(const tri of node.tris){
+    if(stats)stats.triangleTests++;
+    const t=intersectTriangle(o,d,tri);
+    if(t<best){best=t;obj=tri;type='triangle'}
+   }
+  }else{stack.push(node.left,node.right)}
+ }
+ const floor=intersectFloor(o,d);
+ if(floor<best){best=floor;obj={material:'floor'};type='floor'}
+ if(!obj)return null;
+ const p=V.add(o,V.scale(d,best));
+ let n=type==='sphere'?V.norm(V.sub(p,obj.center)):type==='floor'?[0,1,0]:obj.n;
+ if(V.dot(n,d)>0)n=V.scale(n,-1);
+ return {t:best,p,n,material:obj.material,type};
+}
+function anyHit(o,d,maxDistance=Infinity,stats){return trace(o,d,maxDistance,stats)!==null}
+function sampleSky(d){return scene.background(d)}
+function shadeRay(o,d,settings={},depth=0,stats){
+ if(stats){if(depth===0)stats.primaryRays++;else stats.reflectionRays++}
+ const hit=trace(o,d,Infinity,stats);
+ if(!hit)return sampleSky(d);
+ if(stats){stats.hits++;if(depth===0)stats.primaryHits++}
+ const mat=scene.materialAt(hit,hit.p);
+ const ndotl=Math.max(0,V.dot(hit.n,scene.light));
+ let diff=ndotl;
+ if(settings.shadows!==false&&diff>0){
+  const origin=V.add(hit.p,V.scale(hit.n,EPS*6));
+  if(stats)stats.shadowRays++;
+  if(anyHit(origin,scene.light,Infinity,stats)){diff=0;if(stats)stats.shadowed++}
+ }
+ let ao=1;
+ if(settings.ao&&depth===0&&Lab.ambient){
+  ao=Lab.ambient.visibility(hit.p,hit.n,settings.samples||8,stats);
+ }
+ const ambient=0.33*ao;
+ const amount=ambient+0.73*diff;
+ let col=V.scale(mat.color,amount);
+ if(diff>0){
+  const half=V.norm(V.add(scene.light,V.scale(d,-1)));
+  const shine=Math.pow(Math.max(0,V.dot(hit.n,half)),36)*0.30*diff;
+  col=V.add(col,[shine,shine,shine]);
+ }
+ if(depth===0&&mat.reflection>0){
+  const reflDir=V.norm(V.sub(d,V.scale(hit.n,2*V.dot(d,hit.n))));
+  const reflOrigin=V.add(hit.p,V.scale(hit.n,EPS*6));
+  const reflected=shadeRay(reflOrigin,reflDir,{shadows:settings.shadows,ao:false},1,stats);
+  col=V.mix(col,reflected,mat.reflection);
+ }
+ return col;
+}
+function renderRay(w,h,settings={}){
+ const data=new Uint8ClampedArray(w*h*4);
+ const stats={primaryRays:0,reflectionRays:0,shadowRays:0,aoRays:0,hits:0,primaryHits:0,shadowed:0,triangleTests:0};
+ const offsets=Lab.antialiasing?Lab.antialiasing.offsets(settings.aa):[[.5,.5]];
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const c=[0,0,0];
+  for(const [dx,dy] of offsets){
+   const d=scene.cameraRay(x+dx,y+dy,w,h);
+   const v=shadeRay(scene.eye,d,settings,0,stats);
+   c[0]+=v[0];c[1]+=v[1];c[2]+=v[2];
+  }
+  const k=4*(y*w+x);
+  for(let j=0;j<3;j++)data[k+j]=255*Math.pow(V.clamp(c[j]/offsets.length),1/2.05);
+  data[k+3]=255;
+ }
+ return {image:new ImageData(data,w,h),stats};
+}
+window.ChocoLab.raytracing={render:renderRay,trace,anyHit,intersectSphere,intersectFloor,intersectTriangle,shadeRay};
+})();
+</script>
+
+<script>
+// Prueba rápida de ejecución del render de Enrique en el canvas
+window.addEventListener('DOMContentLoaded', () => {
+ const canvas = document.getElementById('canvas');
+ const ctx = canvas.getContext('2d');
+ // Configuración inicial de base para la cámara
+ const forward = window.ChocoLab.V.norm(window.ChocoLab.V.sub(window.ChocoLab.scene.target, window.ChocoLab.scene.eye));
+ const right = window.ChocoLab.V.norm(window.ChocoLab.V.cross([0,1,0], forward));
+ const up = window.ChocoLab.V.norm(window.ChocoLab.V.cross(forward, right));
+ window.ChocoLab.scene.basis = { forward, right, up };
+
+ const result = window.ChocoLab.raytracing.render(320, 200, {shadows: true, ao: false, aa: false});
+ ctx.putImageData(result.image, 0, 0);
+});
+</script>
+
+</body>
+</html>
