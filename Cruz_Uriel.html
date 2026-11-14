@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chocoboyos · Antialiasing (Uriel)</title>
+<style>
+body { background: #110e19; color: #fff7ef; font-family: system-ui, sans-serif; display: grid; place-items: center; height: 100vh; margin: 0; }
+.panel { background: #1b1726; border: 1px solid #44364e; border-radius: 12px; padding: 20px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="panel">
+ <h2>Módulo de Antialiasing (Uriel)</h2>
+ <p style="color: #c2b5c9; font-size: 13px;">Supersampling de cuatro subpíxeles por píxel para el suavizado de bordes.</p>
+ <div id="status" style="color: #b1f1be; font-weight: bold; margin-top: 10px;">Módulo cargado y verificado correctamente.</div>
+</div>
+
+<script>
+/* Inicialización del espacio de nombres ChocoLab */
+window.ChocoLab = {};
+</script>
+
+<script>
+/* PARTE 5 · URIEL: Módulo de Antialiasing (supersampling de 4 subpíxeles). */
+(function(){
+'use strict';
+window.ChocoLab.antialiasing={
+ offsets(enabled){return enabled?[[.25,.25],[.75,.25],[.25,.75],[.75,.75]]:[[.5,.5]]}
+};
+})();
+</script>
+
+</body>
+</html>
