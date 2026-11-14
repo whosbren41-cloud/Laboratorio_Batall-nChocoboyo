@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chocoboyos · Laboratorio Modular de Render</title>
+<style>
+:root{color-scheme:dark;--bg:#110e19;--surface:#1b1726;--line:#44364e;--text:#fff7ef;--muted:#c2b5c9;--a:#ffb878;--b:#ed719e;--c:#8edbc8}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse 70% 35% at 6% 0%,#39233a 0%,transparent 82%),var(--bg);font:15px/1.55 system-ui,-apple-system,sans-serif;color:var(--text)}
+.shell{max-width:1450px;margin:auto;padding:28px clamp(14px,3vw,40px) 48px}
+.topline{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid #46364e;padding-bottom:16px}
+.brand{display:flex;gap:10px;align-items:center;color:#efbac6;font-weight:800;letter-spacing:.15em;text-transform:uppercase;font-size:11px}
+.brand-logo{display:grid;place-items:center;width:34px;height:34px;border:1px solid #9e6d71;background:#523339;border-radius:10px;font-size:19px}
+.chip{border:1px solid #695269;color:#eacbd6;background:#2c2234;border-radius:99px;padding:6px 12px;font-size:12px}
+.heading{padding:22px 0 20px}.eyebrow{letter-spacing:.2em;color:var(--a);text-transform:uppercase;font-weight:900;font-size:11px}
+.heading h1{font-size:clamp(30px,4.2vw,54px);line-height:1.06;margin:6px 0 10px}.heading h1 em{color:var(--a);font-style:normal}
+.grid-main{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,.8fr);gap:20px;align-items:start}
+.frame,.control,.info-panel{border:1px solid var(--line);background:var(--surface);border-radius:18px;overflow:hidden}
+.frame-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:#241e30;font-size:13px}
+.canvas-wrap{position:relative;background:#221e34;display:flex;align-items:center;justify-content:center}
+.canvas-wrap canvas{display:block;width:100%;aspect-ratio:16/10;height:auto;image-rendering:pixelated;object-fit:contain}
+.canvas-watermark{position:absolute;left:12px;bottom:12px;background:#130e18d9;color:#fff8edaa;border:1px solid #fff4e722;padding:4px 8px;font-size:11px;border-radius:6px;pointer-events:none}
+.frame-foot{padding:12px 16px;display:flex;justify-content:space-between;font-size:12px;color:#d2bac7;background:#241e30}
+.control{padding:20px}.control h2{font-size:20px;margin:0 0 6px}.control p{color:var(--muted);margin:0 0 16px;font-size:13px}
+.switcher{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px}
+.mode{border:1px solid #6c536c;border-radius:10px;background:#33283c;color:#eadceb;padding:8px 4px;font-size:12px;font-weight:750;text-align:center}
+.mode span{display:block;font-size:10px;font-weight:400;color:#c4b9c6}
+.mode[aria-pressed=true]{border-color:#f1ac84;background:#714458;color:white}
+.opts{border:1px solid #47394d;background:#211c2e;border-radius:12px;padding:12px;display:grid;gap:12px}
+.option{display:flex;justify-content:space-between;align-items:center;color:#e5dae7;font-size:13px}
+.option small{display:block;color:#a99aaf;font-size:10px}
+.option input[type=checkbox]{accent-color:#e7a174;width:16px;height:16px}
+select{background:#352942;border:1px solid #715573;color:#fff;border-radius:8px;padding:6px 10px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{border:1px solid #664d67;background:#362a42;color:#fff6ed;border-radius:8px;padding:9px 12px;font-weight:730;font-size:12px}
+.btn.primary{background:linear-gradient(120deg,#ffbc7e,#ee8da7);color:#251722;border-color:#efac92}
+.btn.mint{background:#204e48;border-color:#3c8b7d;color:#ccf6e7}
+.btn:hover{filter:brightness(1.12)}.btn[disabled]{opacity:.5;cursor:wait}
+.readout{margin-top:14px;border:1px solid #624b68;border-radius:10px;padding:12px;background:linear-gradient(130deg,#312237,#22223d)}
+.readout .ms{font-size:28px;font-weight:850;color:#ffd18f}
+.info-panel{margin-top:20px;padding:20px}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:#251f34;border:1px solid #47374a;border-radius:12px;padding:12px}
+.stat div{font-size:11px;color:#bdaec4}.stat strong{font-size:20px;display:block;color:#fff3e9}
+.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:600px;font-size:12px}
+th{text-align:left;color:#f9d9ae;background:#33283d;padding:10px}td{padding:10px;border-bottom:1px solid #49394e;color:#e7d6e4}
+tbody tr:nth-child(even){background:#241d2e}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.notes article{border:1px solid #4a394d;border-radius:12px;padding:16px;background:#251e31}
+.notes h3{font-size:14px;margin:0 0 6px;color:#ffd4aa}.notes p{margin:0;color:#cfc1d0;font-size:12px}
+.conclusion{background:#251d32;border-left:3px solid #eba777;padding:12px;color:#ddcfe0;font-size:13px;border-radius:6px}
+@media(max-width:960px){.grid-main{grid-template-columns:1fr}.statgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main class="shell">
+ <header class="topline">
+  <div class="brand"><span class="brand-logo" aria-hidden="true">🍰</span><span>Chocoboyos / Arquitectura Modular</span></div>
+  <div class="chip">Unidad 4 · 5 Integrantes · 100 Pts</div>
+ </header>
+ <section class="heading">
+  <div class="eyebrow">Integración de ramas feature/*</div>
+  <h1>Laboratorio Modular <em>de Render.</em></h1>
+  <p>Demostración limpia y autocontenida dividida exactamente en las 5 aportaciones del equipo.</p>
+ </section>
+ <div class="grid-main">
+  <section class="frame">
+   <div class="frame-head"><strong id="frameTitle">Estación de glaseado / Escena común</strong><span id="resolutionText">320 × 200 px</span></div>
+   <div class="canvas-wrap"><canvas id="canvas" width="320" height="200"></canvas><span class="canvas-watermark" id="watermark">SCANLINE</span></div>
+   <div class="frame-foot"><span id="sceneStats">Triángulos y z-buffer</span><span>Pipeline por Software</span></div>
+  </section>
+  <aside class="control">
+   <h2>Panel de Control</h2>
+   <p>Selecciona una técnica modularizada:</p>
+   <div class="switcher">
+    <button class="mode" data-mode="scanline" aria-pressed="true">01 · Scanline<span>Brenda</span></button>
+    <button class="mode" data-mode="ray" aria-pressed="false">02 · Ray Tracing<span>Enrique</span></button>
+    <button class="mode" data-mode="ao" aria-pressed="false">03 · Ray + AO<span>Emerson</span></button>
+   </div>
+   <div class="opts">
+    <label class="option"><span>Sombras por rayos <small>Enrique</small></span><input type="checkbox" id="shadows" checked></label>
+    <label class="option"><span>Mostrar malla <small>Brenda</small></span><input type="checkbox" id="mesh"></label>
+    <label class="option"><span>Antialiasing 4× <small>Uriel</small></span><input type="checkbox" id="aa"></label>
+    <div class="option"><label for="samples">Muestras AO <small>Emerson</small></label><select id="samples"><option value="4">4</option><option value="8" selected>8</option><option value="16">16</option></select></div>
+    <div class="option"><label for="resolution">Resolución</label><select id="resolution"><option value="320">320 × 200</option><option value="480">480 × 300</option></select></div>
+   </div>
+   <div class="btnrow"><button class="btn primary" id="renderBtn">↻ Renderizar</button><button class="btn mint" id="compareBtn">▥ Medir (Montserrat)</button></div>
+   <div class="readout"><div style="font-size:11px;color:#e8ccdb" id="renderName">Scanline (Brenda)</div><div class="ms" id="renderTime">—</div><div style="font-size:11px;color:#d6c2d5" id="renderDetail">performance.now() activo</div></div>
+   <div class="btnrow"><button class="btn" id="csvBtn">↓ CSV (Montserrat)</button></div>
+   <div id="error" style="color:#ffadae;font-size:12px;margin-top:8px"></div>
+  </aside>
+ </div>
+
+ <section class="info-panel">
+  <div class="section-label" style="display:flex;justify-content:space-between;margin-bottom:12px"><h2>Métricas de Ejecución</h2><span id="statsMode" style="color:var(--a);font-size:12px">Scanline</span></div>
+  <div class="statgrid">
+   <div class="stat"><div>Triángulos / Geometría</div><strong id="nTris">—</strong></div>
+   <div class="stat"><div>Fragmentos / Impactos</div><strong id="nPixels">—</strong></div>
+   <div class="stat"><div>Rayos de sombra</div><strong id="nShadows">—</strong></div>
+   <div class="stat"><div>Rayos AO</div><strong id="nAo">—</strong></div>
+  </div>
+ </section>
+
+ <section class="info-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2>Medición y Comparación (Montserrat)</h2><button class="btn" id="clearBtn">Limpiar tabla</button></div>
+  <div class="table-scroll"><table id="measureTable"><thead><tr><th>Modo</th><th>Resolución</th><th>AO</th><th>AA</th><th>Sombras</th><th>Tiempo (ms)</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div id="emptyRows" style="padding:16px;text-align:center;color:var(--muted)">Pulsa «Medir (Montserrat)» para registrar las tres técnicas.</div>
+  <h3 style="font-size:15px;margin:16px 0 8px;color:#ffd4aa">Conclusión Calidad vs Tiempo</h3>
+  <div id="conclusion" class="conclusion">La conclusión comparativa aparecerá aquí de forma automática.</div>
+ </section>
+
+ <section class="info-panel">
+  <div style="margin-bottom:12px"><h2 style="font-size:17px;margin:0">Integrantes y Ramas (README.md)</h2></div>
+  <div class="notes">
+   <article><h3>1. Brenda · `feature/scanline-brenda`</h3><p>Escena base, vectores, geometría de modelos (esferas, cilindros, cajas) y rasterizador Scanline con coordenadas baricéntricas y z-buffer.</p></article>
+   <article><h3>2. Enrique · `feature/raytracing-enrique`</h3><p>Motor de Ray Tracing completo, BVH para aceleración de triángulos, intersecciones analíticas y cálculo de sombras y reflexión.</p></article>
+   <article><h3>3. Emerson · `feature/ao-emerson`</h3><p>Muestreo de direcciones hemisféricas en cada punto visible para el cálculo de oclusión ambiental con número de muestras configurable.</p></article>
+   <article><h3>4. Montserrat · `feature/comparison-montserrat`</h3><p>Sistema de medición temporal con <code>performance.now()</code>, mediana estadística, tabla comparativa y conclusión automática.</p></article>
+   <article><h3>5. Uriel · `feature/antialiasing-uriel`</h3><p>Supermuestreo de cuatro subpíxeles por píxel (Antialiasing 4×) integrado al pipeline de trazado de rayos para suavizar contornos.</p></article>
+  </div>
+ </section>
+ <footer class="footer" style="padding:20px 0;text-align:center;color:var(--muted);font-size:12px">Chocoboyos · Arquitectura Modular Limpia · Sin dependencias externas</footer>
+</main>
+
+<script>
+/* ==========================================================================
+   PARTE 1 · BRENDA (Líder)
+   Rama: feature/scanline-brenda
+   Responsabilidad: Estructura, escena base, vectores, cilindros, cajas y Scanline.
+   ========================================================================== */
+(function(){
+'use strict';
+const V={
+ add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+ sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+ scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+ dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+ cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+ norm(a){const l=Math.hypot(...a);return l>1e-12?this.scale(a,1/l):[0,1,0]},
+ clamp:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),
+ mix:(a,b,t)=>a.map((v,i)=>v*(1-t)+b[i]*t)
+};
+const materials={
+ platform:{color:[0.23,0.35,0.47],reflection:0.09},
+ pedestal:{color:[0.93,0.74,0.49],reflection:0.17},
+ wrapper:{color:[0.69,0.33,0.22],reflection:0.07},
+ frosting:{color:[0.97,0.38,0.59],reflection:0.23},
+ cream:{color:[0.94,0.76,0.46],reflection:0.15},
+ package:{color:[0.40,0.75,0.81],reflection:0.10},
+ chocolate:{color:[0.37,0.18,0.12],reflection:0.44},
+ cherry:{color:[0.94,0.13,0.27],reflection:0.34},
+ mint:{color:[0.21,0.82,0.63],reflection:0.18},
+ gold:{color:[1.0,0.79,0.34],reflection:0.24},
+ floor:{color:[0.23,0.24,0.38],reflection:0.04},
+ backdrop:{color:[0.35,0.27,0.45],reflection:0.0},
+ accent:{color:[0.37,0.78,0.71],reflection:0.05}
+};
+const scene={
+ name:'Estación de glaseado Chocoboyos',
+ eye:[0,2.48,-4.95],target:[0,1.26,4.5],fov:45*Math.PI/180,
+ floorY:-0.08, light:V.norm([-0.72,1.55,-0.88]),
+ materials, spheres:[], triangles:[],
+ background(dir){const t=V.clamp((dir[1]+0.08)*1.3);return V.mix([0.085,0.10,0.19],[0.18,0.19,0.34],t)},
+ floorColor(p){
+  const tile=1.75;
+  const fx=((p[0]/tile%1)+1)%1, fz=((p[2]/tile%1)+1)%1;
+  if(fx<0.020||fz<0.020){const fade=V.clamp((p[2]-8)/8);return V.mix([0.105,0.14,0.235],[0.22,0.24,0.37],fade)}
+  const stripe=(((Math.floor(p[0]/tile)+Math.floor(p[2]/tile))%4)+4)%4;
+  return stripe===0?[0.27,0.25,0.37]:[0.22,0.24,0.37];
+ },
+ materialAt(obj,point){return obj.material==='floor'?{color:this.floorColor(point),reflection:materials.floor.reflection}:materials[obj.material]}
+};
+const forward=V.norm(V.sub(scene.target,scene.eye));
+const right=V.norm(V.cross([0,1,0],forward));
+const up=V.norm(V.cross(forward,right));
+scene.basis={forward,right,up};
+scene.cameraRay=function(x,y,w,h){
+ const f=Math.tan(this.fov/2),aspect=w/h;
+ return V.norm(V.add(forward,V.add(V.scale(right,(2*x/w-1)*aspect*f),V.scale(up,(1-2*y/h)*f))));
+};
+scene.project=function(p,w,h){
+ const rel=V.sub(p,this.eye),z=V.dot(rel,forward);
+ if(z<=0.12)return null;
+ const f=Math.tan(this.fov/2);
+ return {x:w/2+(V.dot(rel,right)/(z*f))*(h/2), y:h/2-(V.dot(rel,up)/(z*f))*(h/2),z};
+};
+function triangle(a,b,c,material){
+ const n=V.norm(V.cross(V.sub(b,a),V.sub(c,a)));
+ const min=a.map((v,i)=>Math.min(v,b[i],c[i])), max=a.map((v,i)=>Math.max(v,b[i],c[i]));
+ scene.triangles.push({a,b,c,n,material,min,max,centroid:V.scale(V.add(V.add(a,b),c),1/3)});
+}
+function box(center,size,material){
+ const [x,y,z]=center,[w,h,d]=size.map(v=>v/2);
+ const p=[[x-w,y-h,z-d],[x+w,y-h,z-d],[x+w,y+h,z-d],[x-w,y+h,z-d],
+          [x-w,y-h,z+d],[x+w,y-h,z+d],[x+w,y+h,z+d],[x-w,y+h,z+d]];
+ const faces=[[0,3,2,1],[4,5,6,7],[0,4,7,3],[1,2,6,5],[3,7,6,2],[0,1,5,4]];
+ for(const [a,b,c,d_] of faces){triangle(p[a],p[b],p[c],material);triangle(p[a],p[c],p[d_],material)}
+}
+function cylinder(x,z,yBottom,yTop,rBottom,rTop,material,steps=20){
+ const bottom=[x,yBottom,z],top=[x,yTop,z];
+ for(let i=0;i<steps;i++){
+  const t0=i*2*Math.PI/steps,t1=(i+1)*2*Math.PI/steps;
+  const a=[x+rBottom*Math.cos(t0),yBottom,z+rBottom*Math.sin(t0)];
+  const b=[x+rBottom*Math.cos(t1),yBottom,z+rBottom*Math.sin(t1)];
+  const c=[x+rTop*Math.cos(t0),yTop,z+rTop*Math.sin(t0)];
+  const d=[x+rTop*Math.cos(t1),yTop,z+rTop*Math.sin(t1)];
+  triangle(a,c,d,material);triangle(a,d,b,material);
+  if(rTop>0)triangle(top,d,c,material);
+  if(rBottom>0)triangle(bottom,a,b,material);
+ }
+}
+box([0,1.78,10.65],[18,3.7,.12],'backdrop');
+box([-4.1,1.95,10.5],[.17,3.55,.18],'accent');
+box([4.1,1.95,10.5],[.17,3.55,.18],'accent');
+box([0,3.65,10.5],[8.35,.17,.18],'accent');
+box([0,0.34,4.5],[6.5,0.85,3.65],'platform');
+cylinder(-1.53,4.1,0.77,0.94,1.07,1.07,'pedestal',24);
+cylinder(-1.53,4.1,0.94,1.55,0.76,0.68,'wrapper',20);
+cylinder(-1.53,4.1,1.55,1.87,0.79,0.48,'frosting',24);
+cylinder(-1.53,4.1,1.87,1.97,0.48,0.45,'cream',20);
+scene.spheres.push({center:[-1.53,2.16,4.1],radius:0.23,material:'cherry'});
+scene.spheres.push({center:[1.13,1.49,3.94],radius:0.70,material:'chocolate'});
+scene.spheres.push({center:[1.94,1.16,4.73],radius:0.30,material:'mint'});
+scene.spheres.push({center:[0.22,1.13,3.06],radius:0.30,material:'gold'});
+box([0.55,1.09,6.04],[1.52,0.63,1.03],'package');
+
+function sphereMesh(s,lat=15,lon=30){
+ const tris=[];
+ const f=(a,b)=>[s.center[0]+s.radius*Math.cos(a)*Math.cos(b),s.center[1]+s.radius*Math.sin(a),s.center[2]+s.radius*Math.cos(a)*Math.sin(b)];
+ for(let j=0;j<lat;j++)for(let k=0;k<lon;k++){
+  const a=-Math.PI/2+j*Math.PI/lat,b=-Math.PI/2+(j+1)*Math.PI/lat;
+  const u=k*2*Math.PI/lon,v=(k+1)*2*Math.PI/lon;
+  const p0=f(a,u),p1=f(a,v),p2=f(b,u),p3=f(b,v);
+  for(const p of [[p0,p2,p3],[p0,p3,p1]]){
+   let n=V.norm(V.cross(V.sub(p[1],p[0]),V.sub(p[2],p[0])));
+   const middle=V.scale(V.add(V.add(p[0],p[1]),p[2]),1/3);
+   if(V.dot(n,V.sub(middle,s.center))<0)n=V.scale(n,-1);
+   tris.push({a:p[0],b:p[1],c:p[2],n,material:s.material});
+  }
+ }
+ return tris;
+}
+const sphereTris=scene.spheres.flatMap(s=>sphereMesh(s));
+const floorTris=[
+ {a:[-22,scene.floorY,-2],b:[22,scene.floorY,32],c:[22,scene.floorY,-2],n:[0,1,0],material:'floor'},
+ {a:[-22,scene.floorY,-2],b:[-22,scene.floorY,32],c:[22,scene.floorY,32],n:[0,1,0],material:'floor'}
+];
+function renderScanline(w,h,opts={}){
+ const pixels=new Uint8ClampedArray(w*h*4),zbuffer=new Float32Array(w*h);zbuffer.fill(Infinity);
+ const stats={triangles:0,fragments:0,visible:0};
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const c=scene.background(scene.cameraRay(x+.5,y+.5,w,h)),k=4*(y*w+x);
+  pixels[k]=c[0]*255;pixels[k+1]=c[1]*255;pixels[k+2]=c[2]*255;pixels[k+3]=255;
+ }
+ const overlay=[];
+ function raster(t){
+  const a=scene.project(t.a,w,h),b=scene.project(t.b,w,h),c=scene.project(t.c,w,h);
+  if(!a||!b||!c)return;
+  const area=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+  if(Math.abs(area)<1e-8)return;
+  const xmin=Math.max(0,Math.floor(Math.min(a.x,b.x,c.x))),xmax=Math.min(w-1,Math.ceil(Math.max(a.x,b.x,c.x)));
+  const ymin=Math.max(0,Math.floor(Math.min(a.y,b.y,c.y))),ymax=Math.min(h-1,Math.ceil(Math.max(a.y,b.y,c.y)));
+  if(xmin>xmax||ymin>ymax)return;
+  stats.triangles++;
+  const inv=1/area,light=0.32+0.68*Math.max(0,V.dot(t.n,scene.light));
+  const invza=1/a.z,invzb=1/b.z,invzc=1/c.z;
+  const mat=scene.materials[t.material];
+  for(let y=ymin;y<=ymax;y++)for(let x=xmin;x<=xmax;x++){
+   const px=x+.5,py=y+.5;
+   const A=((b.x-px)*(c.y-py)-(b.y-py)*(c.x-px))*inv;
+   const B=((c.x-px)*(a.y-py)-(c.y-py)*(a.x-px))*inv;
+   const C=1-A-B;
+   if(A< -1e-6||B< -1e-6||C< -1e-6)continue;
+   stats.fragments++;
+   const iz=A*invza+B*invzb+C*invzc;
+   if(iz<=0)continue;
+   const z=1/iz,idx=y*w+x;
+   if(z>=zbuffer[idx])continue;
+   zbuffer[idx]=z;stats.visible++;
+   let col=mat.color;
+   if(t.material==='floor'){
+    const X=(A*t.a[0]*invza+B*t.b[0]*invzb+C*t.c[0]*invzc)*z;
+    const Z=(A*t.a[2]*invza+B*t.b[2]*invzb+C*t.c[2]*invzc)*z;
+    col=scene.floorColor([X,scene.floorY,Z]);
+   }
+   const k=idx*4;
+   pixels[k]=V.clamp(col[0]*light)*255;
+   pixels[k+1]=V.clamp(col[1]*light)*255;
+   pixels[k+2]=V.clamp(col[2]*light)*255;
+  }
+  if(opts.mesh&&t.material!=='floor')overlay.push([a,b,c]);
+ }
+ for(const t of floorTris)raster(t);
+ for(const t of sphereTris)raster(t);
+ for(const t of scene.triangles)raster(t);
+ return {image:new ImageData(pixels,w,h),stats,overlay};
+}
+window.ChocoLab={scene,scanline:{render:renderScanline}};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   PARTE 2 · ENRIQUE
+   Rama: feature/raytracing-enrique
+   Responsabilidad: Ray Tracing, BVH, intersecciones, sombras y reflexión.
+   ========================================================================== */
+(function(){
+'use strict';
+const Lab=window.ChocoLab,{scene}=Lab,V=Lab.scene?{}:null,EPS=0.002;
+// Re-utilizamos V y scene definidos por Brenda
+const getV=()=>window.ChocoLab.scene.basis?window.ChocoLab.scene:{}; 
+// Implementación optimizada de BVH y Ray Tracing
+(function(){
+ const V=window.ChocoLab.scene?window.ChocoLab.scene.basis||{}:null; // safety
+})();
+})();
+(function(){
+'use strict';
+const Lab=window.ChocoLab,scene=Lab.scene;
+// Definimos vectores locales seguros si fuera necesario
+const V=window.ChocoLab.scene.background?{
+ add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+ sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+ scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+ dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+ cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+ norm(a){const l=Math.hypot(...a);return l>1e-12?this.scale(a,1/l):[0,1,0]},
+ clamp:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),
+ mix:(a,b,t)=>a.map((v,i)=>v*(1-t)+b[i]*t)
+}:{};
+const EPS=0.002;
+for(const t of scene.triangles){t.e1=V.sub(t.b,t.a);t.e2=V.sub(t.c,t.a)}
+function bvh(tris,depth=0){
+ const min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+ for(const t of tris)for(let i=0;i<3;i++){min[i]=Math.min(min[i],t.min[i]);max[i]=Math.max(max[i],t.max[i])}
+ if(tris.length<=7||depth>=20)return {min,max,tris};
+ const lengths=min.map((v,i)=>max[i]-v),axis=lengths.indexOf(Math.max(...lengths));
+ tris.sort((a,b)=>a.centroid[axis]-b.centroid[axis]);
+ const mid=tris.length>>1;
+ return {min,max,left:bvh(tris.slice(0,mid),depth+1),right:bvh(tris.slice(mid),depth+1)};
+}
+const tree=bvh(scene.triangles.slice());
+function hitBox(o,d,n,tlimit){
+ let near=EPS,far=tlimit;
+ for(let i=0;i<3;i++){
+  if(Math.abs(d[i])<1e-9){if(o[i]<n.min[i]||o[i]>n.max[i])return false;continue}
+  const inv=1/d[i],t0=(n.min[i]-o[i])*inv,t1=(n.max[i]-o[i])*inv;
+  near=Math.max(near,Math.min(t0,t1));far=Math.min(far,Math.max(t0,t1));
+  if(far<near)return false;
+ }
+ return true;
+}
+function intersectTriangle(o,d,t){
+ const p=V.cross(d,t.e2),det=V.dot(t.e1,p);
+ if(Math.abs(det)<1e-9)return Infinity;
+ const inv=1/det,s=V.sub(o,t.a),u=V.dot(s,p)*inv;
+ if(u<0||u>1)return Infinity;
+ const q=V.cross(s,t.e1),v=V.dot(d,q)*inv;
+ if(v<0||u+v>1)return Infinity;
+ const dist=V.dot(t.e2,q)*inv;
+ return dist>EPS?dist:Infinity;
+}
+function intersectSphere(o,d,s){
+ const oc=V.sub(o,s.center),b=V.dot(oc,d),c=V.dot(oc,oc)-s.radius*s.radius;
+ const delta=b*b-c;if(delta<0)return Infinity;
+ const root=Math.sqrt(delta);let t=-b-root;
+ if(t<=EPS)t=-b+root;
+ return t>EPS?t:Infinity;
+}
+function intersectFloor(o,d){
+ if(Math.abs(d[1])<1e-9)return Infinity;
+ const t=(scene.floorY-o[1])/d[1];
+ if(t<=EPS)return Infinity;
+ const x=o[0]+t*d[0],z=o[2]+t*d[2];
+ return x>=-22&&x<=22&&z>=-2&&z<=32?t:Infinity;
+}
+function trace(o,d,limit=Infinity,stats){
+ let best=limit,obj=null,type=null;
+ for(const s of scene.spheres){
+  const t=intersectSphere(o,d,s);
+  if(t<best){best=t;obj=s;type='sphere'}
+ }
+ const stack=[tree];
+ while(stack.length){
+  const node=stack.pop();
+  if(!hitBox(o,d,node,best))continue;
+  if(node.tris){
+   for(const tri of node.tris){
+    if(stats)stats.triangleTests++;
+    const t=intersectTriangle(o,d,tri);
+    if(t<best){best=t;obj=tri;type='triangle'}
+   }
+  }else{stack.push(node.left,node.right)}
+ }
+ const floor=intersectFloor(o,d);
+ if(floor<best){best=floor;obj={material:'floor'};type='floor'}
+ if(!obj)return null;
+ const p=V.add(o,V.scale(d,best));
+ let n=type==='sphere'?V.norm(V.sub(p,obj.center)):type==='floor'?[0,1,0]:obj.n;
+ if(V.dot(n,d)>0)n=V.scale(n,-1);
+ return {t:best,p,n,material:obj.material,type};
+}
+function anyHit(o,d,maxDistance=Infinity,stats){return trace(o,d,maxDistance,stats)!==null}
+function shadeRay(o,d,settings={},depth=0,stats){
+ if(stats){if(depth===0)stats.primaryRays++;else stats.reflectionRays++}
+ const hit=trace(o,d,Infinity,stats);
+ if(!hit)return scene.background(d);
+ if(stats){stats.hits++;if(depth===0)stats.primaryHits++}
+ const mat=scene.materialAt(hit,hit.p);
+ const ndotl=Math.max(0,V.dot(hit.n,scene.light));
+ let diff=ndotl;
+ if(settings.shadows!==false&&diff>0){
+  const origin=V.add(hit.p,V.scale(hit.n,EPS*6));
+  if(stats)stats.shadowRays++;
+  if(anyHit(origin,scene.light,Infinity,stats)){diff=0;if(stats)stats.shadowed++}
+ }
+ let ao=1;
+ if(settings.ao&&depth===0&&Lab.ambient){
+  ao=Lab.ambient.visibility(hit.p,hit.n,settings.samples||8,stats);
+ }
+ const ambient=0.33*ao;
+ const amount=ambient+0.73*diff;
+ let col=V.scale(mat.color,amount);
+ if(diff>0){
+  const half=V.norm(V.add(scene.light,V.scale(d,-1)));
+  const shine=Math.pow(Math.max(0,V.dot(hit.n,half)),36)*0.30*diff;
+  col=V.add(col,[shine,shine,shine]);
+ }
+ if(depth===0&&mat.reflection>0){
+  const reflDir=V.norm(V.sub(d,V.scale(hit.n,2*V.dot(d,hit.n))));
+  const reflOrigin=V.add(hit.p,V.scale(hit.n,EPS*6));
+  const reflected=shadeRay(reflOrigin,reflDir,{shadows:settings.shadows,ao:false},1,stats);
+  col=V.mix(col,reflected,mat.reflection);
+ }
+ return col;
+}
+function renderRay(w,h,settings={}){
+ const data=new Uint8ClampedArray(w*h*4);
+ const stats={primaryRays:0,reflectionRays:0,shadowRays:0,aoRays:0,primaryHits:0,shadowed:0};
+ const offsets=Lab.antialiasing?Lab.antialiasing.offsets(settings.aa):[[.5,.5]];
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const c=[0,0,0];
+  for(const [dx,dy] of offsets){
+   const d=scene.cameraRay(x+dx,y+dy,w,h);
+   const v=shadeRay(scene.eye,d,settings,0,stats);
+   c[0]+=v[0];c[1]+=v[1];c[2]+=v[2];
+  }
+  const k=4*(y*w+x);
+  for(let j=0;j<3;j++)data[k+j]=255*Math.pow(V.clamp(c[j]/offsets.length),1/2.05);
+  data[k+3]=255;
+ }
+ return {image:new ImageData(data,w,h),stats};
+}
+Lab.raytracing={render:renderRay,trace,anyHit};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   PARTE 3 · EMERSON
+   Rama: feature/ao-emerson
+   Responsabilidad: Oclusión Ambiental con muestreo hemisférico ajustable.
+   ========================================================================== */
+(function(){
+'use strict';
+const Lab=window.ChocoLab,scene=Lab.scene;
+const V=scene.background?{
+ add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+ sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+ scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+ dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+ cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+ norm(a){const l=Math.hypot(...a);return l>1e-12?this.scale(a,1/l):[0,1,0]},
+ clamp:(v,a=0,b=1)=>Math.max(a,Math.min(b,v))
+}:{};
+const PI2=Math.PI*2,EPS=0.012;
+const hash=p=>{const k=Math.sin(p[0]*12.9898+p[1]*78.233+p[2]*37.719)*43758.5453;return k-Math.floor(k)};
+function visibility(p,n,N=8,stats){
+ N=Math.max(1,Math.min(64,N|0));
+ const axis=Math.abs(n[1])<0.95?[0,1,0]:[1,0,0];
+ const u=V.norm(V.cross(axis,n)),v=V.norm(V.cross(n,u));
+ const angle0=hash(p)*PI2,origin=V.add(p,V.scale(n,EPS));
+ const radius=1.65;
+ let occluded=0;
+ for(let i=0;i<N;i++){
+  const q=(i+.5)/N,r=Math.sqrt(q),z=Math.sqrt(1-q);
+  const phi=angle0+i*2.399963229728653;
+  const d=V.norm(V.add(V.scale(u,r*Math.cos(phi)),V.add(V.scale(v,r*Math.sin(phi)),V.scale(n,z))));
+  if(stats)stats.aoRays++;
+  const hit=Lab.raytracing.trace(origin,d,radius,stats);
+  if(hit){const proximity=1-hit.t/radius;occluded+=0.35+0.65*proximity}
+ }
+ return V.clamp(1-0.92*occluded/N);
+}
+Lab.ambient={visibility};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   PARTE 4 · MONTSERRAT
+   Rama: feature/comparison-montserrat
+   Responsabilidad: Medición de tiempos, mediana estadística, tabla y conclusión.
+   ========================================================================== */
+(function(){
+'use strict';
+const median=v=>{const a=v.slice().sort((x,y)=>x-y);return a[Math.floor(a.length/2)]};
+function calculate(records){
+ const byMode={};for(const r of records)byMode[r.mode]=r;
+ const s=byMode.scanline,r=byMode.ray,a=byMode.ao;
+ if(!(s&&r&&a))return 'Ejecuta «Medir (Montserrat)» para completar el análisis comparativo.';
+ const ratio1=(r.ms/s.ms).toFixed(2),ratio2=(a.ms/r.ms).toFixed(2);
+ return `En esta resolución (${s.width}×${s.height}), Scanline tardó ${s.ms.toFixed(1)} ms, Ray Tracing ${r.ms.toFixed(1)} ms y AO ${a.ms.toFixed(1)} ms. La relación Ray/Scanline fue ${ratio1}× y AO/Ray ${ratio2}×.`;
+}
+function csv(records){
+ const esc=s=>'"'+String(s).replace(/"/g,'""')+'"';
+ const rows=[['Técnica','Resolución','AO','AA','Sombras','Tiempo ms']];
+ for(const r of records)rows.push([r.label,`${r.width}x${r.height}`,r.mode==='ao'?r.samples:'—',r.aa?'4x':'1x',r.shadows===null?'—':r.shadows?'sí':'no',r.ms.toFixed(2)]);
+ return '\ufeff'+rows.map(v=>v.map(esc).join(';')).join('\r\n');
+}
+window.ChocoLab.comparison={median,calculate,csv};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   PARTE 5 · URIEL
+   Rama: feature/antialiasing-uriel
+   Responsabilidad: Antialiasing 4x por supermuestreo de subpíxeles.
+   ========================================================================== */
+(function(){
+'use strict';
+window.ChocoLab.antialiasing={
+ offsets(enabled){return enabled?[[.25,.25],[.75,.25],[.25,.75],[.75,.75]]:[[.5,.5]]}
+};
+})();
+</script>
+
+<script>
+/* ==========================================================================
+   ORQUESTADOR GENERAL (Integración UI de las 5 Partes)
+   ========================================================================== */
+(function(){
+'use strict';
+const Lab=window.ChocoLab,{scanline,raytracing,comparison}=Lab;
+const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d',{alpha:false});
+const state={mode:'scanline',shadows:true,mesh:false,aa:false,samples:8,width:320,height:200};
+const names={scanline:'Scanline (Brenda)',ray:'Ray Tracing (Enrique)',ao:'Ray Tracing + AO (Emerson)'};
+let busy=false,history=[];
+function settings(m=state.mode){return {shadows:state.shadows,mesh:state.mesh,aa:m==='scanline'?false:state.aa,ao:m==='ao',samples:state.samples}}
+function recordRender(m,opt){
+ const start=performance.now();
+ const res=m==='scanline'?scanline.render(state.width,state.height,opt):raytracing.render(state.width,state.height,opt);
+ const ms=performance.now()-start;
+ return {res,ms,mode:m,settings:opt,width:state.width,height:state.height};
+}
+function present(result){
+ canvas.width=result.width;canvas.height=result.height;
+ ctx.putImageData(result.res.image,0,0);
+ if(result.mode==='scanline'&&result.settings.mesh){
+  ctx.beginPath();ctx.strokeStyle='rgba(255,237,177,.45)';ctx.lineWidth=.45;
+  for(const tri of result.res.overlay){ctx.moveTo(tri[0].x,tri[0].y);ctx.lineTo(tri[1].x,tri[1].y);ctx.lineTo(tri[2].x,tri[2].y);ctx.closePath()}
+  ctx.stroke();
+ }
+ $('renderName').textContent=names[result.mode];
+ $('renderTime').textContent=`${result.ms.toFixed(1)} ms`;
+ $('renderDetail').textContent=`${result.width} × ${result.height} px · ${result.repeats?'mediana de 3 runs':'ejecución única'}`;
+ $('resolutionText').textContent=`${result.width} × ${result.height} px`;
+ $('watermark').textContent=result.mode.toUpperCase();
+ const s=result.res.stats;
+ $('sceneStats').textContent=result.mode==='scanline'?`${s.triangles.toLocaleString()} triángulos · ${s.visible.toLocaleString()} fragmentos`:`${s.primaryRays.toLocaleString()} rayos primarios`;
+ $('statsMode').textContent=names[result.mode];
+ $('nTris').textContent=result.mode==='scanline'?s.triangles.toLocaleString():'—';
+ $('nPixels').textContent=result.mode==='scanline'?s.visible.toLocaleString():s.primaryHits.toLocaleString();
+ $('nShadows').textContent=result.mode==='scanline'?'—':s.shadowRays.toLocaleString();
+ $('nAo').textContent=result.mode==='ao'?s.aoRays.toLocaleString():'—';
+}
+function addRow(res){
+ const rec={mode:res.mode,label:names[res.mode],width:res.width,height:res.height,samples:res.settings.samples,aa:res.settings.aa,shadows:res.mode==='scanline'?null:res.settings.shadows,ms:res.ms};
+ history.push(rec);
+ const tr=document.createElement('tr');
+ for(const v of [rec.label,`${rec.width}×${rec.height}`,rec.mode==='ao'?rec.samples:'—',rec.aa?'4×':'1×',rec.shadows===null?'—':rec.shadows?'Sí':'No',rec.ms.toFixed(1)]){
+  const td=document.createElement('td');td.textContent=v;tr.appendChild(td);
+ }
+ $('rows').prepend(tr);$('emptyRows').hidden=true;
+}
+function refreshUI(){
+ document.querySelectorAll('[data-mode]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.mode===state.mode)));
+ $('samples').disabled=state.mode!=='ao';$('mesh').disabled=state.mode!=='scanline';
+ $('aa').disabled=state.mode==='scanline';$('shadows').disabled=state.mode==='scanline';
+}
+const nextFrame=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+async function single(m=state.mode){
+ if(busy)return;busy=true;
+ try{await nextFrame();const res=recordRender(m,settings(m));present(res);addRow(res)}
+ catch(e){console.error(e)}finally{busy=false}
+}
+async function compareAll(){
+ if(busy)return;busy=true;$('error').textContent='';
+ try{
+  const resList=[];
+  for(const m of ['scanline','ray','ao']){
+   $('renderName').textContent='Midiendo: '+names[m];
+   await nextFrame();
+   const opts=settings(m);opts.aa=false;
+   const runs=[];let r;
+   for(let i=0;i<3;i++){r=recordRender(m,opts);runs.push(r.ms);await nextFrame()}
+   r.ms=comparison.median(runs);r.repeats=3;
+   present(r);addRow(r);resList.push(r);
+  }
+  $('conclusion').textContent=comparison.calculate(resList);
+  state.mode='ao';refreshUI();
+ }catch(e){console.error(e)}finally{busy=false}
+}
+for(const btn of document.querySelectorAll('[data-mode]'))btn.addEventListener('click',()=>{state.mode=btn.dataset.mode;refreshUI();single()});
+$('shadows').addEventListener('change',e=>{state.shadows=e.target.checked;single()});
+$('mesh').addEventListener('change',e=>{state.mesh=e.target.checked;single()});
+$('aa').addEventListener('change',e=>{state.aa=e.target.checked;single()});
+$('samples').addEventListener('change',e=>{state.samples=Number(e.target.value);single()});
+$('resolution').addEventListener('change',e=>{state.width=Number(e.target.value);state.height=Math.round(state.width*200/320);single()});
+$('renderBtn').addEventListener('click',()=>single());
+$('compareBtn').addEventListener('click',compareAll);
+$('clearBtn').addEventListener('click',()=>{history=[];$('rows').replaceChildren();$('emptyRows').hidden=false;$('conclusion').textContent='Resultados limpiados.'});
+$('csvBtn').addEventListener('click',()=>{
+ const blob=new Blob([comparison.csv(history)],{type:'text/csv;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='chocoboyos_tiempos.csv';a.click();
+});
+refreshUI();
+single();
+})();
+</script>
+</body>
+</html>
