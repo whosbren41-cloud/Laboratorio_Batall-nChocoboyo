@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chocoboyos · Laboratorio de técnicas de render</title>
+<style>:root{color-scheme:dark;--bg:#110e19;--surface:#1b1726;--surface2:#262035;--line:#44364e;--text:#fff7ef;--muted:#c2b5c9;--a:#ffb878;--b:#ed719e;--c:#8edbc8;--good:#b1f1be}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse 70% 35% at 6% 0%,#39233a 0%,transparent 82%),var(--bg);font:15px/1.55 system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--text)}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #efbd8f;outline-offset:3px}.shell{max-width:1500px;margin:auto;padding:32px clamp(16px,3.2vw,46px) 56px}
+.topline{display:flex;align-items:center;gap:13px;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid #46364e;padding-bottom:19px}.brand{display:flex;gap:12px;align-items:center;color:#efbac6;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:11px}.brand-logo{display:grid;place-items:center;width:36px;height:36px;border:1px solid #9e6d71;background:#523339;border-radius:11px;font-size:21px}.chip{border:1px solid #695269;color:#eacbd6;background:#2c2234;border-radius:99px;padding:7px 13px;font-size:12px}.heading{padding:27px 0 26px}.eyebrow{letter-spacing:.21em;color:var(--a);text-transform:uppercase;font-weight:900;font-size:11px}.heading h1{font-size:clamp(32px,4.4vw,61px);line-height:1.06;letter-spacing:-.05em;margin:8px 0 13px;max-width:850px}.heading h1 em{color:var(--a);font-style:normal}.heading p{color:#d2c4d3;font-size:16px;max-width:750px;margin:0}.grid-main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(335px,.83fr);gap:20px;align-items:start}.frame,.control,.info-panel{border:1px solid var(--line);background:var(--surface);border-radius:19px;overflow:hidden}.frame-head{padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#241e30}.frame-head strong{font-size:14px}.frame-head span{color:#c5bacb;font-size:12px;text-align:right}.canvas-wrap{position:relative;min-height:250px;background:#221e34;display:flex;align-items:center;justify-content:center;overflow:hidden}.canvas-wrap canvas{display:block;width:100%;aspect-ratio:16/10;height:auto;image-rendering:pixelated;object-fit:contain}.canvas-watermark{position:absolute;left:14px;bottom:14px;background:#130e18c9;color:#fff8edaa;border:1px solid #fff4e722;padding:4px 9px;font-size:11px;border-radius:6px;pointer-events:none}.frame-foot{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:#d2bac7;background:#241e30;flex-wrap:wrap}.control{padding:23px}.control h2{font-size:21px;margin:0 0 6px;letter-spacing:-.02em}.control p{color:var(--muted);margin:0 0 20px;font-size:13px}.switcher{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:17px}.mode{border:1px solid #6c536c;border-radius:10px;background:#33283c;color:#eadceb;min-height:58px;padding:8px 4px;font-size:12px;font-weight:750;line-height:1.25}.mode span{display:block;font-size:11px;font-weight:400;color:#c4b9c6}.mode[aria-pressed=true]{border-color:#f1ac84;background:#714458;color:white;box-shadow:inset 0 0 0 1px #f3b186}.mode[aria-pressed=true] span{color:#f5d8cc}.opts{border:1px solid #47394d;background:#211c2e;border-radius:12px;padding:13px;display:grid;gap:14px}.option{display:flex;justify-content:space-between;align-items:center;gap:9px;color:#e5dae7;font-size:13px;cursor:pointer}.option small{display:block;color:#a99aaf;font-size:11px}.option input[type=checkbox]{accent-color:#e7a174;width:17px;height:17px;flex-shrink:0}.samples{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.samples select{background:#352942;border:1px solid #715573;color:#fff;border-radius:8px;padding:8px 10px;min-width:88px}.hint{color:#a99aae;font-size:11px}.btnrow{display:flex;flex-wrap:wrap;gap:9px;margin-top:16px}.btn{border:1px solid #664d67;background:#362a42;color:#fff6ed;border-radius:9px;padding:10px 12px;font-weight:730;font-size:12px}.btn.primary{background:linear-gradient(120deg,#ffbc7e,#ee8da7);color:#251722;border-color:#efac92}.btn.mint{background:#204e48;border-color:#3c8b7d;color:#ccf6e7}.btn:hover{filter:brightness(1.13)}.btn[disabled]{opacity:.5;cursor:wait}.readout{margin-top:17px;border:1px solid #624b68;border-radius:11px;padding:14px;background:linear-gradient(130deg,#312237,#22223d)}.readout .name{font-size:12px;color:#e8ccdb}.readout .ms{font-size:32px;font-weight:850;letter-spacing:-.05em;color:#ffd18f;line-height:1.25}.readout .detail{color:#d6c2d5;font-size:11px}.section-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:23px 0 12px}.section-label h2{font-size:17px;margin:0;letter-spacing:-.015em}.section-label span{color:#a99baf;font-size:12px}.info-panel{margin-top:20px;padding:22px}.statgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.stat{background:#251f34;border:1px solid #47374a;border-radius:13px;padding:13px}.stat div{font-size:12px;color:#bdaec4}.stat strong{font-size:22px;display:block;color:#fff3e9;font-variant-numeric:tabular-nums}.muted{color:var(--muted)}.table-scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:650px;font-variant-numeric:tabular-nums;font-size:12px}th{text-align:left;color:#f9d9ae;font-size:11px;letter-spacing:.03em;background:#33283d}td,th{padding:12px;border-bottom:1px solid #49394e}td{color:#e7d6e4}td:last-child,th:last-child{text-align:right}tbody tr:nth-child(even){background:#241d2e}.notes{display:grid;grid-template-columns:1fr 1fr;gap:18px}.notes article{border:1px solid #4a394d;border-radius:12px;padding:16px;background:#251e31}.notes h3{font-size:14px;margin:0 0 7px;color:#ffd4aa}.notes p{margin:0;color:#cfc1d0;font-size:12px}.footer{padding:25px 0 0;color:#a996ae;font-size:12px}.tag{display:inline-block;border:1px solid #82616a;background:#503340;color:#ffd2bc;padding:2px 7px;border-radius:99px;font-size:11px}.empty{padding:25px;text-align:center;color:#a994ad}.busy{color:#b4f1c3;font-weight:700}.key{border:1px solid #716075;border-radius:4px;font-size:10px;padding:2px 5px;background:#393044}.conclusion{background:#251d32;border-left:3px solid #eba777;padding:14px;color:#ddcfe0;font-size:13px;border-radius:7px}#error{color:#ffadae;min-height:0;font-size:12px}
+@media(max-width:1020px){.grid-main{grid-template-columns:1fr}.control{padding:20px}.statgrid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.shell{padding:18px 12px 42px}.heading{padding:22px 0}.heading h1{font-size:37px}.frame-head{align-items:flex-start}.canvas-wrap{min-height:190px}.mode{min-height:65px}.notes{grid-template-columns:1fr}.control{padding:16px}.statgrid{grid-template-columns:repeat(2,1fr)}.topline{gap:10px}}
+</style>
+</head>
+<body>
+<main class="shell">
+ <header class="topline">
+  <div class="brand"><span class="brand-logo" aria-hidden="true">🍰</span><span>Chocoboyos / Computación gráfica</span></div>
+  <div class="chip">Unidad 4 · Laboratorio colaborativo</div>
+ </header>
+ <section class="heading">
+  <div class="eyebrow">Una escena · Cinco aportaciones · Tres técnicas de render</div>
+  <h1>La ciencia detrás <em>del glaseado.</em></h1>
+  <p>Una pequeña estación de repostería, renderizada con algoritmos distintos. Compara triángulos, rayos, sombras de contacto y el costo de suavizar bordes.</p>
+ </section>
+ <div class="grid-main">
+  <section class="frame" aria-label="Escena principal">
+   <div class="frame-head"><strong>Estación de glaseado / Escena común</strong><span>Pastel · bombones · plataforma · luz direccional</span></div>
+   <div class="canvas-wrap"><canvas id="canvas" width="320" height="200" aria-label="Render de la técnica seleccionada"></canvas><span class="canvas-watermark" id="watermark">SCANLINE / SOFTWARE RENDER</span></div>
+   <div class="frame-foot"><span id="sceneStats">Triángulos y z-buffer</span><span id="resolutionText">320 × 200 px</span></div>
+  </section>
+  <aside class="control">
+   <h2>Control de render</h2>
+   <p>Selecciona una técnica: todas utilizan la misma cámara, geometría, materiales y luz.</p>
+   <div class="switcher" role="group" aria-label="Técnica de renderizado">
+    <button class="mode" data-mode="scanline" aria-pressed="true">01 · Scanline<span>Rasterización</span></button>
+    <button class="mode" data-mode="ray" aria-pressed="false">02 · Ray tracing<span>Rayos + reflejo</span></button>
+    <button class="mode" data-mode="ao" aria-pressed="false">03 · Ray + AO<span>Hemisferio</span></button>
+   </div>
+   <div class="opts">
+    <label class="option"><span>Sombras por rayos <small>En los modos Ray Tracing y Ray + AO</small></span><input type="checkbox" id="shadows" checked></label>
+    <label class="option"><span>Mostrar malla <small>Contornos reales de los triángulos Scanline</small></span><input type="checkbox" id="mesh"></label>
+    <label class="option"><span>Antialiasing 4× <small>Cuatro rayos por píxel en modo Ray</small></span><input type="checkbox" id="aa"></label>
+    <div class="option"><label for="samples">Muestras hemisféricas de AO</label><div class="samples"><select id="samples"><option value="4">4</option><option value="8" selected>8</option><option value="16">16</option><option value="32">32</option></select></div></div>
+    <div class="option"><label for="resolution">Resolución de render</label><div class="samples"><select id="resolution"><option value="320">320 × 200</option><option value="480">480 × 300</option></select></div></div>
+   </div>
+   <div class="btnrow"><button class="btn primary" id="renderBtn">↻ Renderizar</button><button class="btn mint" id="compareBtn">▥ Medir las 3 técnicas</button><button class="btn" id="compareAaBtn">Comparar AA 1×/4×</button></div>
+   <div class="readout" aria-live="polite"><div class="name" id="renderName">Scanline</div><div class="ms" id="renderTime">—</div><div class="detail" id="renderDetail">Tiempo real con performance.now()</div></div>
+   <div class="btnrow"><button class="btn" id="downloadBtn">↓ Guardar imagen PNG</button><button class="btn" id="csvBtn">↓ Exportar CSV</button></div>
+   <div id="error" role="alert"></div>
+  </aside>
+ </div>
+ <section class="info-panel">
+  <div class="section-label"><h2>El algoritmo bajo el glaseado</h2><span id="statsMode">Scanline</span></div>
+  <div class="statgrid">
+   <div class="stat"><div>Triángulos rasterizados</div><strong id="nTris">—</strong></div>
+   <div class="stat"><div>Fragmentos / impactos primarios</div><strong id="nPixels">—</strong></div>
+   <div class="stat"><div>Rayos de sombra</div><strong id="nShadows">—</strong></div>
+   <div class="stat"><div>Rayos de oclusión (AO)</div><strong id="nAo">—</strong></div>
+  </div>
+ </section>
+ <section class="info-panel" id="measurements">
+  <div class="section-label"><h2>Medición y comparación</h2><div><button class="btn" id="clearBtn">Limpiar mediciones</button></div></div>
+  <p class="muted" style="font-size:12px;margin-top:0">Resultados medidos en este navegador con <code>performance.now()</code>. El comparador registra la mediana de 3 ejecuciones por técnica a la misma resolución; usa AA desactivado para aislar el coste de AO. Scanline usa sombreado plano y no calcula sombras por rayos. Los valores dependen del equipo.</p>
+  <div class="table-scroll"><table id="measureTable"><thead><tr><th>Modo</th><th>Resolución</th><th>AO</th><th>AA</th><th>Sombras</th><th>Tiempo (ms)</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <div id="emptyRows" class="empty">Selecciona una técnica o pulsa «Medir las 3 técnicas».</div>
+  <div class="section-label"><h2>Conclusión calidad vs. tiempo</h2><span class="tag">Resultado reproducible</span></div>
+  <div id="conclusion" class="conclusion">La conclusión comparativa aparecerá después de ejecutar las tres técnicas. No se incluyen tiempos inventados.</div>
+ </section>
+ <section class="info-panel">
+  <div class="section-label"><h2>Qué está realizando cada integrante</h2><span>Partes técnicas individuales</span></div>
+  <div class="notes">
+   <article><h3>Brenda (Líder) · Scanline</h3><p>Transforma objetos en triángulos, proyecta los vértices y usa coordenadas baricéntricas, z-buffer e iluminación por caras para decidir qué píxel se dibuja[cite: 1, 3].</p></article>
+   <article><h3>Enrique · Ray Tracing</h3><p>Lanza rayos desde la cámara, calcula intersecciones con esferas, triángulos y suelo; envía rayos de sombra y ejecuta un rebote de reflexión[cite: 3].</p></article>
+   <article><h3>Emerson · Oclusión ambiental</h3><p>Genera direcciones hemisféricas en cada punto visible, calcula cuánto tapa la geometría cercana y modifica únicamente la iluminación ambiental[cite: 3].</p></article>
+   <article><h3>Montserrat · Comparación</h3><p>Registra el tiempo de cada técnica, mantiene una tabla de resultados comparables y obtiene una conclusión basada en las mediciones reales[cite: 3].</p></article>
+   <article><h3>Uriel · Antialiasing</h3><p>Usa supersampling de cuatro subpíxeles, compara bordes con y sin AA, y muestra el impacto sobre el tiempo de renderizado[cite: 3].</p></article>
+  </div>
+ </section>
+ <footer class="footer">Chocoboyos · Laboratorio educativo de render por software · HTML Canvas + JavaScript sin dependencias externas</footer>
+</main>
+<script>
+/* PARTE 1 · BRENDA (LÍDER): Escena, matemáticas base y rasterizador Scanline. */
+(function(){
+'use strict';
+const V={
+ add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+ sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+ scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+ dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+ cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+ norm(a){const l=Math.hypot(...a);return l>1e-12?this.scale(a,1/l):[0,1,0]},
+ clamp:(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),
+ mix:(a,b,t)=>a.map((v,i)=>v*(1-t)+b[i]*t)
+};
+const materials={
+ platform:{color:[0.23,0.35,0.47],reflection:0.09},
+ pedestal:{color:[0.93,0.74,0.49],reflection:0.17},
+ wrapper:{color:[0.69,0.33,0.22],reflection:0.07},
+ frosting:{color:[0.97,0.38,0.59],reflection:0.23},
+ cream:{color:[0.94,0.76,0.46],reflection:0.15},
+ package:{color:[0.40,0.75,0.81],reflection:0.10},
+ chocolate:{color:[0.37,0.18,0.12],reflection:0.44},
+ cherry:{color:[0.94,0.13,0.27],reflection:0.34},
+ mint:{color:[0.21,0.82,0.63],reflection:0.18},
+ gold:{color:[1.0,0.79,0.34],reflection:0.24},
+ floor:{color:[0.23,0.24,0.38],reflection:0.04},
+ backdrop:{color:[0.35,0.27,0.45],reflection:0.0},
+ accent:{color:[0.37,0.78,0.71],reflection:0.05}
+};
+const scene={
+ name:'Estación de glaseado Chocoboyos',
+ eye:[0,2.48,-4.95],target:[0,1.26,4.5],fov:45*Math.PI/180,
+ floorY:-0.08, light:V.norm([-0.72,1.55,-0.88]),
+ materials, spheres:[], triangles:[],
+ background(dir){const t=V.clamp((dir[1]+0.08)*1.3);return V.mix([0.085,0.10,0.19],[0.18,0.19,0.34],t)},
+ floorColor(p){
+  const tile=1.75;
+  const fx=((p[0]/tile%1)+1)%1, fz=((p[2]/tile%1)+1)%1;
+  if(fx<0.020||fz<0.020){const fade=V.clamp((p[2]-8)/8);return V.mix([0.105,0.14,0.235],[0.22,0.24,0.37],fade)}
+  const stripe=(((Math.floor(p[0]/tile)+Math.floor(p[2]/tile))%4)+4)%4;
+  return stripe===0?[0.27,0.25,0.37]:[0.22,0.24,0.37];
+ },
+ materialAt(obj,point){return obj.material==='floor'?{color:this.floorColor(point),reflection:materials.floor.reflection}:materials[obj.material]}
+};
+const forward=V.norm(V.sub(scene.target,scene.eye));
+const right=V.norm(V.cross([0,1,0],forward));
+const up=V.norm(V.cross(forward,right));
+scene.basis={forward,right,up};
+scene.cameraRay=function(x,y,w,h){
+ const f=Math.tan(this.fov/2),aspect=w/h;
+ return V.norm(V.add(forward,V.add(V.scale(right,(2*x/w-1)*aspect*f),V.scale(up,(1-2*y/h)*f))));
+};
+scene.project=function(p,w,h){
+ const rel=V.sub(p,this.eye),z=V.dot(rel,forward);
+ if(z<=0.12)return null;
+ const f=Math.tan(this.fov/2);
+ return {x:w/2+(V.dot(rel,right)/(z*f))*(h/2), y:h/2-(V.dot(rel,up)/(z*f))*(h/2),z};
+};
+function triangle(a,b,c,material){
+ const n=V.norm(V.cross(V.sub(b,a),V.sub(c,a)));
+ const min=a.map((v,i)=>Math.min(v,b[i],C?C[i]:c[i])), max=a.map((v,i)=>Math.max(v,b[i],c[i]));
+ scene.triangles.push({a,b,c,n,material,min,max,centroid:V.scale(V.add(V.add(a,b),c),1/3)});
+}
+function box(center,size,material){
+ const [x,y,z]=center,[w,h,d]=size.map(v=>v/2);
+ const p=[[x-w,y-h,z-d],[x+w,y-h,z-d],[x+w,y+h,z-d],[x-w,y+h,z-d],
+          [x-w,y-h,z+d],[x+w,y-h,z+d],[x+w,y+h,z+d],[x-w,y+h,z+d]];
+ const faces=[[0,3,2,1],[4,5,6,7],[0,4,7,3],[1,2,6,5],[3,7,6,2],[0,1,5,4]];
+ for(const [a,b,c,d_] of faces){triangle(p[a],p[b],p[c],material);triangle(p[a],p[c],p[d_],material)}
+}
+function cylinder(x,z,yBottom,yTop,rBottom,rTop,material,steps=20){
+ const bottom=[x,yBottom,z],top=[x,yTop,z];
+ for(let i=0;i<steps;i++){
+  const t0=i*2*Math.PI/steps,t1=(i+1)*2*Math.PI/steps;
+  const a=[x+rBottom*Math.cos(t0),yBottom,z+rBottom*Math.sin(t0)];
+  const b=[x+rBottom*Math.cos(t1),yBottom,z+rBottom*Math.sin(t1)];
+  const c=[x+rTop*Math.cos(t0),yTop,z+rTop*Math.sin(t0)];
+  const d=[x+rTop*Math.cos(t1),yTop,z+rTop*Math.sin(t1)];
+  triangle(a,c,d,material);triangle(a,d,b,material);
+  if(rTop>0)triangle(top,d,c,material);
+  if(rBottom>0)triangle(bottom,a,b,material);
+ }
+}
+box([0,1.78,10.65],[18,3.7,.12],'backdrop');
+box([-4.1,1.95,10.5],[.17,3.55,.18],'accent');
+box([4.1,1.95,10.5],[.17,3.55,.18],'accent');
+box([0,3.65,10.5],[8.35,.17,.18],'accent');
+box([0,0.34,4.5],[6.5,0.85,3.65],'platform');
+cylinder(-1.53,4.1,0.77,0.94,1.07,1.07,'pedestal',24);
+cylinder(-1.53,4.1,0.94,1.55,0.76,0.68,'wrapper',20);
+cylinder(-1.53,4.1,1.55,1.87,0.79,0.48,'frosting',24);
+cylinder(-1.53,4.1,1.87,1.97,0.48,0.45,'cream',20);
+scene.spheres.push({center:[-1.53,2.16,4.1],radius:0.23,material:'cherry'});
+scene.spheres.push({center:[1.13,1.49,3.94],radius:0.70,material:'chocolate'});
+scene.spheres.push({center:[1.94,1.16,4.73],radius:0.30,material:'mint'});
+scene.spheres.push({center:[0.22,1.13,3.06],radius:0.30,material:'gold'});
+box([0.55,1.09,6.04],[1.52,0.63,1.03],'package');
+
+function sphereMesh(s,lat=15,lon=30){
+ const tris=[];
+ const f=(a,b)=>[s.center[0]+s.radius*Math.cos(a)*Math.cos(b),
+                  s.center[1]+s.radius*Math.sin(a),
+                  s.center[2]+s.radius*Math.cos(a)*Math.sin(b)];
+ for(let j=0;j<lat;j++)for(let k=0;k<lon;k++){
+  const a=-Math.PI/2+j*Math.PI/lat,b=-Math.PI/2+(j+1)*Math.PI/lat;
+  const u=k*2*Math.PI/lon,v=(k+1)*2*Math.PI/lon;
+  const p0=f(a,u),p1=f(a,v),p2=f(b,u),p3=f(b,v);
+  for(const p of [[p0,p2,p3],[p0,p3,p1]]){
+   let n=V.norm(V.cross(V.sub(p[1],p[0]),V.sub(p[2],p[0])));
+   const middle=V.scale(V.add(V.add(p[0],p[1]),p[2]),1/3);
+   if(V.dot(n,V.sub(middle,s.center))<0)n=V.scale(n,-1);
+   tris.push({a:p[0],b:p[1],c:p[2],n,material:s.material});
+  }
+ }
+ return tris;
+}
+const sphereTris=scene.spheres.flatMap(s=>sphereMesh(s));
+const floorTris=[
+ {a:[-22,scene.floorY,-2],b:[22,scene.floorY,32],c:[22,scene.floorY,-2],n:[0,1,0],material:'floor'},
+ {a:[-22,scene.floorY,-2],b:[-22,scene.floorY,32],c:[22,scene.floorY,32],n:[0,1,0],material:'floor'}
+];
+function renderScanline(w,h,opts={}){
+ const pixels=new Uint8ClampedArray(w*h*4),zbuffer=new Float32Array(w*h);zbuffer.fill(Infinity);
+ const stats={triangles:0,fragments:0,visible:0,depthReject:0};
+ for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+  const c=scene.background(scene.cameraRay(x+.5,y+.5,w,h)),k=4*(y*w+x);
+  pixels[k]=c[0]*255;pixels[k+1]=c[1]*255;pixels[k+2]=c[2]*255;pixels[k+3]=255;
+ }
+ const overlay=[];
+ function raster(t){
+  const a=scene.project(t.a,w,h),b=scene.project(t.b,w,h),c=scene.project(t.c,w,h);
+  if(!a||!b||!c)return;
+  const area=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+  if(Math.abs(area)<1e-8)return;
+  const xmin=Math.max(0,Math.floor(Math.min(a.x,b.x,c.x))),xmax=Math.min(w-1,Math.ceil(Math.max(a.x,b.x,c.x)));
+  const ymin=Math.max(0,Math.floor(Math.min(a.y,b.y,c.y))),ymax=Math.min(h-1,Math.ceil(Math.max(a.y,b.y,c.y)));
+  if(xmin>xmax||ymin>ymax)return;
+  stats.triangles++;
+  const inv=1/area,light=0.32+0.68*Math.max(0,V.dot(t.n,scene.light));
+  const invza=1/a.z,invzb=1/b.z,invzc=1/c.z;
+  const mat=scene.materials[t.material];
+  for(let y=ymin;y<=ymax;y++)for(let x=xmin;x<=xmax;x++){
+   const px=x+.5,py=y+.5;
+   const A=((b.x-px)*(c.y-py)-(b.y-py)*(c.x-px))*inv;
+   const B=((c.x-px)*(a.y-py)-(c.y-py)*(a.x-px))*inv;
+   const C=1-A-B;
+   if(A<-0.000001||B<-0.000001||C<-0.000001)continue;
+   stats.fragments++;
+   const iz=A*invza+B*invzb+C*invzc;
+   if(iz<=0)continue;
+   const z=1/iz,idx=y*w+x;
+   if(z>=zbuffer[idx]){stats.depthReject++;continue;}
+   zbuffer[idx]=z;stats.visible++;
+   let col=mat.color;
+   if(t.material==='floor'){
+    const X=(A*t.a[0]*invza+B*t.b[0]*invzb+C*t.c[0]*invzc)*z;
+    const Z=(A*t.a[2]*invza+B*t.b[2]*invzb+C*t.c[2]*invzc)*z;
+    col=scene.floorColor([X,scene.floorY,Z]);
+   }
+   const k=idx*4;
+   pixels[k]=V.clamp(col[0]*light)*255;
+   pixels[k+1]=V.clamp(col[1]*light)*255;
+   pixels[k+2]=V.clamp(col[2]*light)*255;
+  }
+  if(opts.mesh&&t.material!=='floor')overlay.push([a,b,c]);
+ }
+ for(const t of floorTris)raster(t);
+ for(const t of sphereTris)raster(t);
+ for(const t of scene.triangles)raster(t);
+ return {image:new ImageData(pixels,w,h),stats,overlay,zbuffer};
+}
+window.ChocoLab={V,scene,triangle,box,cylinder,scanline:{render:renderScanline}};
+})();
+</script>
+</body>
+</html>
