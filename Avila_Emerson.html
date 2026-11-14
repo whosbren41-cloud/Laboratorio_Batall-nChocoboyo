@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chocoboyos · Oclusión Ambiental (Emerson)</title>
+<style>
+body { background: #110e19; color: #fff7ef; font-family: system-ui, sans-serif; display: grid; place-items: center; height: 100vh; margin: 0; }
+.panel { background: #1b1726; border: 1px solid #44364e; border-radius: 12px; padding: 20px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="panel">
+ <h2>Módulo de Oclusión Ambiental (Emerson)</h2>
+ <p style="color: #c2b5c9; font-size: 13px;">Muestreo hemisférico con número de muestras ajustable para calcular sombras de contacto.</p>
+ <div id="status" style="color: #b1f1be; font-weight: bold; margin-top: 10px;">Módulo cargado correctamente y listo para integrarse.</div>
+</div>
+
+<script>
+/* Mock inicial del espacio de nombres ChocoLab y dependencias requeridas */
+window.ChocoLab = {
+ V: {
+  add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
+  sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+  scale:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+  norm(a){const l=Math.hypot(...a);return l>1e-12?this.scale(a,1/l):[0,1,0]},
+  clamp:(v,a=0,b=1)=>Math.max(a,Math.min(b,v))
+ },
+ raytracing: {
+  trace: (o, d, radius, stats) => { return null; } // Stub de prueba para el trazador de rayos
+ }
+};
+</script>
+
+<script>
+/* PARTE 3 · EMERSON: Oclusión Ambiental (Ambient Occlusion) con muestreo hemisférico ajustable. */
+(function(){
+'use strict';
+const Lab=window.ChocoLab,{V,scene}=Lab,PI2=Math.PI*2,EPS=0.012;
+const hash=p=>{const k=Math.sin(p[0]*12.9898+p[1]*78.233+p[2]*37.719)*43758.5453;return k-Math.floor(k)};
+function visibility(p,n,N=8,stats){
+ N=Math.max(1,Math.min(64,N|0));
+ const axis=Math.abs(n[1])<0.95?[0,1,0]:[1,0,0];
+ const u=V.norm(V.cross(axis,n)),v=V.norm(V.cross(n,u));
+ const angle0=hash(p)*PI2,origin=V.add(p,V.scale(n,EPS));
+ const radius=1.65;
+ let occluded=0;
+ for(let i=0;i<N;i++){
+  const q=(i+.5)/N,r=Math.sqrt(q),z=Math.sqrt(1-q);
+  const phi=angle0+i*2.399963229728653;
+  const d=V.norm(V.add(V.scale(u,r*Math.cos(phi)),V.add(V.scale(v,r*Math.sin(phi)),V.scale(n,z))));
+  if(stats)stats.aoRays++;
+  const hit=Lab.raytracing.trace(origin,d,radius,stats);
+  if(hit){const proximity=1-hit.t/radius;occluded+=0.35+0.65*proximity}
+ }
+ return V.clamp(1-0.92*occluded/N);
+}
+window.ChocoLab.ambient={visibility};
+})();
+</script>
+
+</body>
+</html>
